@@ -1,6 +1,13 @@
 package org.example
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 data class Puzzle(val cells: List<Cell>) {
     fun neighbours(cell: Cell): SortedSet<Cell> = cells
@@ -96,21 +103,33 @@ fun findLinearTriplets(tripletAcc: List<Cell>, visited: SortedSet<Cell>, puzzle:
     }
 }
 
+private val stepDebugCounter = AtomicInteger(1)
+
 fun findSolution(puzzle: Puzzle): SortedSet<Triplet>? {
     val triplets = findTriplets(puzzle)
 
     require(puzzle.cells.count() % 3 == 0)
     val solutionTripletCount = puzzle.cells.count() / 3
 
-    return findSolution(solutionTripletCount, sortedSetOf(), triplets)
+    return runBlocking {
+        findSolution(solutionTripletCount, sortedSetOf(), triplets)
+    }.also {
+        println(stepDebugCounter)
+    }
 }
 
-fun findSolution(solutionTripletCount: Int, acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet>? {
+suspend fun findSolution(
+    solutionTripletCount: Int,
+    acc: SortedSet<Triplet>,
+    rem: SortedSet<Triplet>
+): SortedSet<Triplet>? {
     return if (acc.size + rem.size < solutionTripletCount) {
         null
     } else if (rem.isEmpty()) {
         acc
     } else {
+        stepDebugCounter.incrementAndGet()
+
         val cellsTriplets = rem
             .flatMap { triplet -> triplet.cells.map { cell -> cell to triplet } }
             .groupBy(Pair<Cell, Triplet>::first) { it.second }
@@ -134,13 +153,25 @@ fun findSolution(solutionTripletCount: Int, acc: SortedSet<Triplet>, rem: Sorted
             }
 
             else -> {
-                foundTriplets.firstNotNullOfOrNull { candidate ->
-                    val remWithoutFoundCells = rem
-                        .asSequence()
-                        .filter { triplet -> triplet.cells.none { cell -> cell in candidate.cells } }
-                        .toSortedSet()
+                coroutineScope {
+                    val tasks = foundTriplets
+                        .asFlow()
+                        .map { candidate ->
+                            val remWithoutFoundCells = rem
+                                .asSequence()
+                                .filter { triplet -> triplet.cells.none { cell -> cell in candidate.cells } }
+                                .toSortedSet()
 
-                    findSolution(solutionTripletCount, (acc + candidate).toSortedSet(), remWithoutFoundCells)
+                            findSolution(
+                                solutionTripletCount,
+                                (acc + candidate).toSortedSet(),
+                                remWithoutFoundCells
+                            )
+                        }
+
+                    val notNull = tasks
+                        .filterNotNull()
+                    notNull.firstOrNull()
                 }
             }
         }
