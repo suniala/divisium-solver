@@ -84,3 +84,30 @@ fun findLinearTriplets(tripletAcc: List<Cell>, visited: Set<Cell>, puzzle: Puzzl
             .toSet()
     }
 }
+
+fun findSolution(puzzle: Puzzle): Set<Triplet> {
+    val triplets = findTriplets(puzzle)
+    return findWithOnlyOneChoice(emptySet(), triplets)
+}
+
+fun findWithOnlyOneChoice(acc: Set<Triplet>, rem: Set<Triplet>): Set<Triplet> {
+    return if (rem.isEmpty()) {
+        acc
+    } else {
+        val (_, _, foundTriplet) = rem
+            .flatMap { triplet -> triplet.cells.map { cell -> cell to triplet } }
+            .toSet()
+            .map { (cell, triplet) ->
+                Triple(cell, rem.count { otherTriplet -> otherTriplet.cells.contains(cell) }, triplet)
+            }
+            .firstOrNull { (_, tripletCount) -> tripletCount == 1 }
+            ?: throw IllegalStateException("Must find at least one cell that is in only one triplet")
+
+        val remWithoutFoundCells = rem
+            .asSequence()
+            .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells }}
+            .toSet()
+
+        findWithOnlyOneChoice(acc + foundTriplet, remWithoutFoundCells)
+    }
+}
