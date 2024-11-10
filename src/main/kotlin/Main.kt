@@ -99,27 +99,35 @@ fun findLinearTriplets(tripletAcc: List<Cell>, visited: SortedSet<Cell>, puzzle:
 
 fun findSolution(puzzle: Puzzle): SortedSet<Triplet> {
     val triplets = findTriplets(puzzle)
-    return findWithOnlyOneChoice(sortedSetOf(), triplets)
+    return findSolution(sortedSetOf(), triplets)
 }
 
-fun findWithOnlyOneChoice(acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet> {
+fun findSolution(acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet> {
     return if (rem.isEmpty()) {
         acc
     } else {
-        val (_, _, foundTriplet) = rem
+        val withLeastOptions = rem
             .flatMap { triplet -> triplet.cells.map { cell -> cell to triplet } }
             .toSet()
             .map { (cell, triplet) ->
                 Triple(cell, rem.count { otherTriplet -> otherTriplet.cells.contains(cell) }, triplet)
             }
-            .firstOrNull { (_, tripletCount) -> tripletCount == 1 }
-            ?: throw IllegalStateException("Must find at least one cell that is in only one triplet\nacc=${acc}\nrem=${rem}")
+            .sortedWith(compareBy({ it.second }, { it.first }))
 
-        val remWithoutFoundCells = rem
-            .asSequence()
-            .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells } }
-            .toSortedSet()
+        val (_, count, foundTriplet) = withLeastOptions.first()
+        when (count) {
+            1 -> {
+                val remWithoutFoundCells = rem
+                    .asSequence()
+                    .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells } }
+                    .toSortedSet()
 
-        findWithOnlyOneChoice((acc + foundTriplet).toSortedSet(), remWithoutFoundCells)
+                findSolution((acc + foundTriplet).toSortedSet(), remWithoutFoundCells)
+            }
+
+            else -> {
+                sortedSetOf<Triplet>()
+            }
+        }
     }
 }
