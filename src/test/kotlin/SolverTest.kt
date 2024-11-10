@@ -119,7 +119,7 @@ class SolverTest {
     }
 
     @Test
-    fun findSolution3x3() {
+    fun findSolution3x3Trivial() {
         val puzzle = Puzzle.fromString(
             """
             0 2 1
@@ -152,7 +152,7 @@ class SolverTest {
     }
 
     @Test
-    fun findSolution6x6() {
+    fun findSolution6x6Trivial() {
         val puzzle = Puzzle.fromString(
             """
             0 1 0 0 1 2
@@ -228,6 +228,29 @@ class SolverTest {
                     Cell(5, 4, 0),
                 ),
             ).formatForComparison(),
+            solution.formatForComparison()
+        )
+    }
+
+    @Test
+    fun findSolution9x9NotTrivial() {
+        val puzzle = Puzzle.fromString(
+            """
+            2 1 0 1 1 1 1 1 1
+            0 2 2 0 1 2 0 1 1
+            1 0 1 2 1 1 1 0 1
+            0 1 2 0 3 1 1 1 2
+            2 1 0 0 0 1 2 1 0
+            1 0 3 0 0 1 2 0 2
+            1 2 0 0 3 1 1 1 1
+            1 2 1 0 0 2 0 1 1
+            1 0 1 2 1 2 1 1 1
+            """
+        )
+
+        val solution = findSolution(puzzle)
+        assertEquals(
+            emptySet<Triplet>().formatForComparison(),
             solution.formatForComparison()
         )
     }

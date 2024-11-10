@@ -101,7 +101,7 @@ fun findWithOnlyOneChoice(acc: Set<Triplet>, rem: Set<Triplet>): Set<Triplet> {
                 Triple(cell, rem.count { otherTriplet -> otherTriplet.cells.contains(cell) }, triplet)
             }
             .firstOrNull { (_, tripletCount) -> tripletCount == 1 }
-            ?: throw IllegalStateException("Must find at least one cell that is in only one triplet")
+            ?: throw IllegalStateException("Must find at least one cell that is in only one triplet\nacc=${acc}\nrem=${rem}")
 
         val remWithoutFoundCells = rem
             .asSequence()
