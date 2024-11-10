@@ -96,36 +96,52 @@ fun findLinearTriplets(tripletAcc: List<Cell>, visited: SortedSet<Cell>, puzzle:
     }
 }
 
-fun findSolution(puzzle: Puzzle): SortedSet<Triplet> {
+fun findSolution(puzzle: Puzzle): SortedSet<Triplet>? {
     val triplets = findTriplets(puzzle)
-    return findSolution(sortedSetOf(), triplets)
+
+    require(puzzle.cells.count() % 3 == 0)
+    val solutionTripletCount = puzzle.cells.count() / 3
+
+    return findSolution(solutionTripletCount, sortedSetOf(), triplets)
 }
 
-fun findSolution(acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet> {
-    return if (rem.isEmpty()) {
+fun findSolution(solutionTripletCount: Int, acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet>? {
+    return if (acc.size + rem.size < solutionTripletCount) {
+        null
+    } else if (rem.isEmpty()) {
         acc
     } else {
-        val withLeastOptions = rem
+        val cellsTriplets = rem
             .flatMap { triplet -> triplet.cells.map { cell -> cell to triplet } }
-            .toSet()
-            .map { (cell, triplet) ->
-                Triple(cell, rem.count { otherTriplet -> otherTriplet.cells.contains(cell) }, triplet)
-            }
-            .sortedWith(compareBy({ it.second }, { it.first }))
+            .groupBy(Pair<Cell, Triplet>::first) { it.second }
 
-        val (_, count, foundTriplet) = withLeastOptions.first()
-        when (count) {
+        val cellsInLeastTriplets = cellsTriplets.asSequence()
+            .map { (key, value) -> key to value }
+            .sortedWith(compareBy({ it.second.size }, { it.first }))
+            .toList()
+
+        val (_, foundTriplets) = cellsInLeastTriplets.first()
+        when (foundTriplets.size) {
+            0 -> throw IllegalStateException("")
             1 -> {
+                val foundTriplet = foundTriplets.single()
                 val remWithoutFoundCells = rem
                     .asSequence()
                     .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells } }
                     .toSortedSet()
 
-                findSolution((acc + foundTriplet).toSortedSet(), remWithoutFoundCells)
+                findSolution(solutionTripletCount, (acc + foundTriplet).toSortedSet(), remWithoutFoundCells)
             }
 
             else -> {
-                sortedSetOf<Triplet>()
+                foundTriplets.firstNotNullOfOrNull { candidate ->
+                    val remWithoutFoundCells = rem
+                        .asSequence()
+                        .filter { triplet -> triplet.cells.none { cell -> cell in candidate.cells } }
+                        .toSortedSet()
+
+                    findSolution(solutionTripletCount, (acc + candidate).toSortedSet(), remWithoutFoundCells)
+                }
             }
         }
     }

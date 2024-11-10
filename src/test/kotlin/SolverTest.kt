@@ -148,7 +148,7 @@ class SolverTest {
                     Cell(row = 2, col = 2, value = 0)
                 ),
             ).formatForComparison(),
-            solution.formatForComparison()
+            solution?.formatForComparison()
         )
     }
 
@@ -229,7 +229,7 @@ class SolverTest {
                     Cell(5, 4, 0),
                 ),
             ).formatForComparison(),
-            solution.formatForComparison()
+            solution?.formatForComparison()
         )
     }
 
@@ -251,8 +251,144 @@ class SolverTest {
 
         val solution = findSolution(puzzle)
         assertEquals(
-            sortedSetOf<Triplet>().formatForComparison(),
-            solution.formatForComparison()
+            sortedSetOf(
+                Triplet.of(
+                    Cell(row = 0, col = 0, value = 2),
+                    Cell(row = 1, col = 0, value = 0),
+                    Cell(row = 2, col = 0, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 0, col = 1, value = 1),
+                    Cell(row = 0, col = 2, value = 0),
+                    Cell(row = 1, col = 2, value = 2)
+                ),
+                Triplet.of(
+                    Cell(row = 0, col = 3, value = 1),
+                    Cell(row = 0, col = 4, value = 1),
+                    Cell(row = 1, col = 4, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 0, col = 5, value = 1),
+                    Cell(row = 0, col = 6, value = 1),
+                    Cell(row = 0, col = 7, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 0, col = 8, value = 1),
+                    Cell(row = 1, col = 7, value = 1),
+                    Cell(row = 1, col = 8, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 1, col = 1, value = 2),
+                    Cell(row = 2, col = 1, value = 0),
+                    Cell(row = 3, col = 1, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 1, col = 3, value = 0),
+                    Cell(row = 2, col = 2, value = 1),
+                    Cell(row = 2, col = 3, value = 2)
+                ),
+                Triplet.of(
+                    Cell(row = 1, col = 5, value = 2),
+                    Cell(row = 1, col = 6, value = 0),
+                    Cell(row = 2, col = 6, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 2, col = 4, value = 1),
+                    Cell(row = 2, col = 5, value = 1),
+                    Cell(row = 3, col = 5, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 2, col = 7, value = 0),
+                    Cell(row = 2, col = 8, value = 1),
+                    Cell(row = 3, col = 8, value = 2)
+                ),
+                Triplet.of(
+                    Cell(row = 3, col = 0, value = 0),
+                    Cell(row = 4, col = 0, value = 2),
+                    Cell(row = 5, col = 0, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 3, col = 2, value = 2),
+                    Cell(row = 4, col = 1, value = 1),
+                    Cell(row = 4, col = 2, value = 0)
+                ),
+                Triplet.of(
+                    Cell(row = 3, col = 3, value = 0),
+                    Cell(row = 3, col = 4, value = 3),
+                    Cell(row = 4, col = 3, value = 0)
+                ),
+                Triplet.of(
+                    Cell(row = 3, col = 6, value = 1),
+                    Cell(row = 3, col = 7, value = 1),
+                    Cell(row = 4, col = 7, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 4, col = 4, value = 0),
+                    Cell(row = 4, col = 5, value = 1),
+                    Cell(row = 4, col = 6, value = 2)
+                ),
+                Triplet.of(
+                    Cell(row = 4, col = 8, value = 0),
+                    Cell(row = 5, col = 8, value = 2),
+                    Cell(row = 6, col = 8, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 5, col = 1, value = 0),
+                    Cell(row = 5, col = 2, value = 3),
+                    Cell(row = 5, col = 3, value = 0)
+                ),
+                Triplet.of(
+                    Cell(row = 5, col = 4, value = 0),
+                    Cell(row = 6, col = 3, value = 0),
+                    Cell(row = 6, col = 4, value = 3)
+                ),
+                Triplet.of(
+                    Cell(row = 5, col = 5, value = 1),
+                    Cell(row = 5, col = 6, value = 2),
+                    Cell(row = 5, col = 7, value = 0)
+                ),
+                Triplet.of(
+                    Cell(row = 6, col = 0, value = 1),
+                    Cell(row = 7, col = 0, value = 1),
+                    Cell(row = 8, col = 0, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 6, col = 1, value = 2),
+                    Cell(row = 6, col = 2, value = 0),
+                    Cell(row = 7, col = 2, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 6, col = 5, value = 1),
+                    Cell(row = 7, col = 4, value = 0),
+                    Cell(row = 7, col = 5, value = 2)
+                ),
+                Triplet.of(
+                    Cell(row = 6, col = 6, value = 1),
+                    Cell(row = 6, col = 7, value = 1),
+                    Cell(row = 7, col = 7, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 7, col = 1, value = 2),
+                    Cell(row = 8, col = 1, value = 0),
+                    Cell(row = 8, col = 2, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 7, col = 3, value = 0),
+                    Cell(row = 8, col = 3, value = 2),
+                    Cell(row = 8, col = 4, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 7, col = 6, value = 0),
+                    Cell(row = 8, col = 5, value = 2),
+                    Cell(row = 8, col = 6, value = 1)
+                ),
+                Triplet.of(
+                    Cell(row = 7, col = 8, value = 1),
+                    Cell(row = 8, col = 7, value = 1),
+                    Cell(row = 8, col = 8, value = 1)
+                )
+            ).formatForComparison(),
+            solution?.formatForComparison()
         )
     }
 
