@@ -30,11 +30,10 @@ data class Puzzle(val cells: List<Cell>) {
 }
 
 data class Cell(val row: Int, val col: Int, val value: Int) : Comparable<Cell> {
-    override fun compareTo(other: Cell): Int = compareKey().compareTo(other.compareKey())
-
-    private fun compareKey(): String = "${row}_${col}"
+    override fun compareTo(other: Cell): Int = comparator.compare(this, other)
 
     companion object {
+        private val comparator = compareBy(Cell::row).thenBy(Cell::col)
         fun sum(cells: Collection<Cell>): Int = cells.map(Cell::value).sum()
     }
 }
