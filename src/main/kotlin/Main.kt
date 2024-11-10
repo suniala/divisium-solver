@@ -1,13 +1,15 @@
 package org.example
 
+import java.util.*
+
 data class Puzzle(val cells: List<Cell>) {
-    fun neighbours(cell: Cell): Set<Cell> = cells
+    fun neighbours(cell: Cell): SortedSet<Cell> = cells
         .filter {
             (it.col == cell.col && (it.row == (cell.row - 1) || it.row == (cell.row + 1)))
                     || (it.row == cell.row && (it.col == (cell.col - 1) || it.col == (cell.col + 1)))
         }
         .filter { it != cell }
-        .toSet()
+        .toSortedSet()
 
     companion object {
         fun fromString(s: String): Puzzle = Puzzle(
@@ -27,13 +29,17 @@ data class Puzzle(val cells: List<Cell>) {
     }
 }
 
-data class Cell(val row: Int, val col: Int, val value: Int) {
+data class Cell(val row: Int, val col: Int, val value: Int) : Comparable<Cell> {
+    override fun compareTo(other: Cell): Int = compareKey().compareTo(other.compareKey())
+
+    private fun compareKey(): String = "${row}_${col}"
+
     companion object {
         fun sum(cells: Collection<Cell>): Int = cells.map(Cell::value).sum()
     }
 }
 
-data class Triplet(val cells: Set<Cell>) {
+data class Triplet(val cells: SortedSet<Cell>) : Comparable<Triplet> {
     init {
         require(cells.size == 3) {
             "Size is not 3: $cells"
@@ -43,29 +49,35 @@ data class Triplet(val cells: Set<Cell>) {
         }
     }
 
+    override fun compareTo(other: Triplet): Int =
+        cells
+            .asSequence()
+            .zip(other.cells.asSequence())
+            .map { (a, b) -> a.compareTo(b) }
+            .firstOrNull { it != 0 }
+            ?: 0
+
     override fun toString(): String {
         return "Triplet(cells=${cells.sortedBy { "${it.row}_$it.col" }})"
     }
 
     companion object {
-        fun of(c1: Cell, c2: Cell, c3: Cell) = Triplet(setOf(c1, c2, c3))
-        fun of(cells: Collection<Cell>) = Triplet(cells.toSet())
+        fun of(c1: Cell, c2: Cell, c3: Cell) = Triplet(sortedSetOf(c1, c2, c3))
+        fun of(cells: Collection<Cell>) = Triplet(cells.toSortedSet())
     }
 }
 
-fun findTriplets(puzzle: Puzzle): Set<Triplet> {
-    val a = puzzle.cells
+fun findTriplets(puzzle: Puzzle): SortedSet<Triplet> =
+    puzzle.cells
         .asSequence()
         .flatMap { cell ->
-            findLinearTriplets(listOf(cell), setOf(cell), puzzle)
+            findLinearTriplets(listOf(cell), sortedSetOf(cell), puzzle)
         }
-        .toSet()
-    return a
-}
+        .toSortedSet()
 
-fun findLinearTriplets(tripletAcc: List<Cell>, visited: Set<Cell>, puzzle: Puzzle): Set<Triplet> {
+fun findLinearTriplets(tripletAcc: List<Cell>, visited: SortedSet<Cell>, puzzle: Puzzle): SortedSet<Triplet> {
     return if (tripletAcc.size == 3 && Cell.sum(tripletAcc) == 3) {
-        setOf(Triplet.of(tripletAcc))
+        sortedSetOf(Triplet.of(tripletAcc))
     } else {
         val currCell = tripletAcc.last()
         val neighbours = puzzle.neighbours(currCell)
@@ -77,20 +89,20 @@ fun findLinearTriplets(tripletAcc: List<Cell>, visited: Set<Cell>, puzzle: Puzzl
             .flatMap { neighbour ->
                 findLinearTriplets(
                     tripletAcc = tripletAcc + neighbour,
-                    visited = visited + neighbours,
+                    visited = (visited + neighbours).toSortedSet(),
                     puzzle = puzzle
                 )
             }
-            .toSet()
+            .toSortedSet()
     }
 }
 
-fun findSolution(puzzle: Puzzle): Set<Triplet> {
+fun findSolution(puzzle: Puzzle): SortedSet<Triplet> {
     val triplets = findTriplets(puzzle)
-    return findWithOnlyOneChoice(emptySet(), triplets)
+    return findWithOnlyOneChoice(sortedSetOf(), triplets)
 }
 
-fun findWithOnlyOneChoice(acc: Set<Triplet>, rem: Set<Triplet>): Set<Triplet> {
+fun findWithOnlyOneChoice(acc: SortedSet<Triplet>, rem: SortedSet<Triplet>): SortedSet<Triplet> {
     return if (rem.isEmpty()) {
         acc
     } else {
@@ -105,9 +117,9 @@ fun findWithOnlyOneChoice(acc: Set<Triplet>, rem: Set<Triplet>): Set<Triplet> {
 
         val remWithoutFoundCells = rem
             .asSequence()
-            .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells }}
-            .toSet()
+            .filter { triplet -> triplet.cells.none { cell -> cell in foundTriplet.cells } }
+            .toSortedSet()
 
-        findWithOnlyOneChoice(acc + foundTriplet, remWithoutFoundCells)
+        findWithOnlyOneChoice((acc + foundTriplet).toSortedSet(), remWithoutFoundCells)
     }
 }

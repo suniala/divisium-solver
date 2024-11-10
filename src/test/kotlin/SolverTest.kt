@@ -6,6 +6,7 @@ import org.example.findSolution
 import org.example.findTriplets
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import java.util.*
 import kotlin.test.assertEquals
 
 class SolverTest {
@@ -66,7 +67,7 @@ class SolverTest {
                     Cell(row = 1, col = 1, value = 1)
                 ),
             ),
-            findLinearTriplets(listOf(puzzle.cells.first()), setOf(puzzle.cells.first()), puzzle)
+            findLinearTriplets(listOf(puzzle.cells.first()), sortedSetOf(puzzle.cells.first()), puzzle)
         )
     }
 
@@ -82,7 +83,7 @@ class SolverTest {
 
         val candidates = findTriplets(puzzle)
         assertEquals(
-            setOf(
+            sortedSetOf(
                 Triplet.of(
                     Cell(row = 0, col = 0, value = 0),
                     Cell(row = 0, col = 1, value = 2),
@@ -130,7 +131,7 @@ class SolverTest {
 
         val solution = findSolution(puzzle)
         assertEquals(
-            setOf(
+            sortedSetOf(
                 Triplet.of(
                     Cell(row = 0, col = 0, value = 0),
                     Cell(row = 0, col = 1, value = 2),
@@ -166,7 +167,7 @@ class SolverTest {
 
         val solution = findSolution(puzzle)
         assertEquals(
-            setOf(
+            sortedSetOf(
                 Triplet.of(
                     Cell(0, 0, 0),
                     Cell(0, 1, 1),
@@ -250,26 +251,22 @@ class SolverTest {
 
         val solution = findSolution(puzzle)
         assertEquals(
-            emptySet<Triplet>().formatForComparison(),
+            sortedSetOf<Triplet>().formatForComparison(),
             solution.formatForComparison()
         )
     }
 
     companion object {
-        fun Collection<Triplet>.formatForComparison(): String = this
-            .sortedBy { triplet -> triplet.cells.map { """${it.row}_${it.col}""" }.sorted().joinToString(",") }
-            .map { triple ->
+        fun SortedSet<Triplet>.formatForComparison(): String = this
+            .joinToString("\n") { triple ->
                 val formattedCells = triple.cells
-                    .sortedBy { """${it.row}_${it.col}""" }
-                    .map { cell ->
+                    .joinToString("\n") { cell ->
                         """  Cell(${cell.row}, ${cell.col}=${cell.value})"""
                     }
-                    .joinToString("\n")
                 """|Triplet.of(
                    |$formattedCells
                    |)
                 """.trimMargin()
             }
-            .joinToString("\n")
     }
 }
